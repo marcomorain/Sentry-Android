@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: marcomorain/android:0.11
+    environment:
+      QEMU_AUDIO_DRV: none
+      TERM: dumb
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Start Emulator
+          command: |
+            avdmanager create avd --name pixel --device pixel --tag google_apis --package 'system-images;android-25;google_apis;armeabi-v7a'
+            emulator -verbose -no-boot-anim -gpu swiftshader -no-audio -no-window -avd pixel
+          background: true
+      - restore_cache:
+          key: cache-7-{{ checksum "build.gradle" }}-{{ checksum "sentry-android/build.gradle" }}
+
+      - run:
+          name: Compile
+          command: |
+            touch local.properties
+            ./gradlew assembleAndroidTest
+      - save_cache:
+          key: cache-7-{{ checksum "build.gradle" }}-{{ checksum "sentry-android/build.gradle" }}
+          paths:
+            - ~/.m2
+            - ~/.android/cache/
+            - ~/.gradle
+      - run:
+          name: Wait for simulator
+          command: ./circle-android wait-for-boot
+      - run: adb shell input keyevent 82
+
+      - run:
+          name: Test
+          command: |
+            echo foo
+            adb install sentry-android/build/outputs/apk/sentry-android-debug-androidTest.apk
+            echo bar
+            adb shell am instrument -w com.joshdholtz.sentry.test/android.test.InstrumentationTestRunner
+            echo baz
