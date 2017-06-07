@@ -13,7 +13,12 @@ jobs:
           name: Start Emulator
           command: |
             avdmanager create avd --name pixel --device pixel --tag google_apis --package 'system-images;android-25;google_apis;armeabi-v7a'
-            emulator -verbose -no-boot-anim -gpu swiftshader -no-audio -no-window -avd pixel
+            emulator -memory 256 -verbose -no-boot-anim -gpu swiftshader -no-audio -no-window -avd pixel
+          background: true
+      - run:
+          name: Logcat
+          command:
+            adb logcat
           background: true
       - restore_cache:
           key: cache-7-{{ checksum "build.gradle" }}-{{ checksum "sentry-android/build.gradle" }}
