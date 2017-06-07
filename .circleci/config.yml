@@ -1,6 +1,7 @@
 version: 2
 jobs:
   build:
+    resource_class: xlarge
     docker:
       - image: marcomorain/android:0.11
     environment:
@@ -37,8 +38,6 @@ jobs:
       - run:
           name: Wait for simulator
           command: ./circle-android wait-for-boot
-      - run: adb shell input keyevent 82
-
       - run:
           name: Test
           command: |
@@ -47,3 +46,4 @@ jobs:
             echo bar
             adb shell am instrument -w com.joshdholtz.sentry.test/android.test.InstrumentationTestRunner
             echo baz
+
