@@ -42,8 +42,13 @@ jobs:
           name: Test
           command: |
             echo foo
+            adb devices
             sleep 60
             echo wake
+            adb devices
+            echo start packages
+            adb shell pm list packages
+            echo done packages
             adb install sentry-android/build/outputs/apk/sentry-android-debug-androidTest.apk
             echo bar
             adb shell am instrument -w com.joshdholtz.sentry.test/android.test.InstrumentationTestRunner
